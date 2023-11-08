@@ -52,7 +52,7 @@ public class User{
         return pin;
     }
     
-    /** Getter method for obtaining user's Last Sign In information. 
+    /** Getter method for obtaining user's Last Sign In information.  
      * @return String
      */
     public String getLastSignIn() {
