@@ -7,7 +7,7 @@ import java.util.Collections;
  * Simplifies the logging process by offering methods for
  * different types of log messages (e.g., general messages and errors).
  * The logged messages are saved to a file named Log.txt in the same directory.
- * 
+
  * @author Kelcey Calderon
  */
 public class Log {
@@ -17,7 +17,7 @@ public class Log {
 
     /**
      * Logs a general message.
-     * 
+
      * @param message The message to be logged.
      */
     public static void msg(String message) {
@@ -26,7 +26,7 @@ public class Log {
 
     /**
      * Logs an error message.
-     * 
+
      * @param message The error message to be logged.
      */
     public static void error(String message) {
@@ -36,12 +36,10 @@ public class Log {
     /**
      * Writes a log message to both the console and the log file.
      * The log message is prefixed with a timestamp and the message type.
-     * 
      * @param msgType The type of the message, e.g., INFO, ERROR.
      * @param message The actual message to be logged.
      */
     private static void writeLog(String msgType, String message) {
-        
         System.out.println(message);
 
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
@@ -65,4 +63,7 @@ public class Log {
         Log.error("This is an error.");
     }
     */
+
 }
+
+
