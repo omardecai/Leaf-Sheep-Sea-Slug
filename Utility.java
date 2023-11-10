@@ -1,131 +1,134 @@
-import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
- * The Utility class contains methods to read files 'Dungeon.csv' and 'users.csv' and methods that
- * check the username and passwordinputed by the user. If no user is found
- * another method will allow the user to register
+ * This is the Dungeon class that sets and gets the dungeon map from the utility class
+ * , prints the dungeon map, checks for player moves, and updates the dungeon if needed
  * @author Edgar Arellano
- *
  */
-class Utility {
-    private List<String[]> userDataArray;
-    public void userDataFile(String userFile){
-        this.userDataArray = readUserInfo(userFile);
-    }
+class Dungeon {
+
+    private Map<String, Map<String, String>> map;
+
 
     /**
-     * This method reads the dungeon file "Dungeon.csv" and stores into an array
-     * @param dungeonFile
-     * @return this method returns the map after reading the 'Dungeon.csv' file
+     * This method sets the dungeonMap gathered from the Utility Class
+     * @param dungeonMap
      */
-    public String[][] readDungeon(String dungeonFile) {
-        List<String[]> dungeonMap = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(dungeonFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] row = line.split(",");
-                dungeonMap.add(row);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        String[][] map = new String[dungeonMap.size()][];
-        for (int i = 0; i < dungeonMap.size(); i++) {
-            map[i] = dungeonMap.get(i);
-        }
+    public void setMap(Map<String, Map<String, String>> dungeonMap) {
+        this.map = dungeonMap;
+    }
+    
+    /**
+     * Getter method to return the map
+     * @return this method returns the dungeon map
+     */
+    public Map<String, Map<String, String>> getMap() {
         return map;
     }
 
     /**
-     * This method reads the file 'Users.csv' and stores in arrayList
-     * @param userFile
+     * Print method to print out the dungeon map
+     * 
      */
-    public List<String[]> readUserInfo(String userFile){
-        List<String[]> userData = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(userFile))){
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] userInfo = line.split(",");
-                userData.add(userInfo);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return userData;
-    }
-
-    /**
-     * This method checks the username and password entered by the player and returns a boolean upon
-     * success or failure
-     *
-     * @param targetUsername
-     * @param targetPassword
-     * @return boolean depending on successful user and password
-     */
-    public boolean checkUser(String targetUsername, String targetPassword){
-        for (String[] userData : userDataArray) {
-            if (userData.length == 11) {
-                String username = userData[2];
-                String password = userData[5];
-
-                if (username.equals(targetUsername) && password.equals(targetPassword)) {
-                    return true;
+    public void printMap() {
+        System.out.println("------------------------------------------------------------------");
+    
+        for (int row = 0; row < 20; row++) {
+            Map<String, String> rowMap = map.get(String.valueOf(row));
+    
+            if (rowMap != null) {
+                List<String> sortedColumns = new ArrayList<>(rowMap.keySet());
+                Collections.sort(sortedColumns);
+    
+                for (int col = 0; col < 24; col++) {
+                    String colKey = String.valueOf(col);
+                    String cellValue = rowMap.get(colKey);
+    
+                    switch (cellValue) {
+                        case "-1":
+                            System.out.print("| ");
+                            break;
+                        case "0":
+                            System.out.print("0 ");
+                            break;
+                        case "e":
+                            System.out.print("e ");
+                            break;
+                        case "$":
+                            System.out.print("$ ");
+                            break;
+                        default:
+                            System.out.print(cellValue);
+                    }
                 }
-            }
+            } 
+            
+    
+            System.out.println();
         }
-        return false;
+        System.out.println("------------------------------------------------------------------");
     }
+
     /**
-     * Allows the user to register as new user with the parameters as inputs
+     * Checks if the next move by the player is possible.
      *
-     * @param state
-     * @param username
-     * @param firstname
-     * @param password
-     * @param lastName
-     * @param city
-     * @param zip
-     * @param dateOfBirth
+     * @param row The row coordinate of the next move.
+     * @param col The column coordinate of the next move.
+     * @return true if the move is possible, false otherwise.
      */
-    public void registerUser(String state, String username, String firstname, String password, String lastName, String city, String zip, String dateOfBirth){
-        String newEntry = state + ",0," + username + firstname + ",0," + password + lastName + city + zip + dateOfBirth;
-        userDataArray.add(newEntry.split(","));
+    public boolean isMovePossible(int row, int col) {
+        if (map == null || row < 0 || row >= map.size()) {
+            return false;
+        }
 
-
-
+        Map<String, String> rowMap = map.get(String.valueOf(row));
+        return rowMap != null && col >= 0 && col < rowMap.size();
     }
+
+
     /**
-     * Creates a saveFile for the game
-     * @param targetUsername
-     */
-    public void updateUser(String targetUsername){
+    * This method updates the cells that the player has explored 
+    * Cells that a player has explored are marked as x,
+    * and cells that a player has not explored are marked u.
+    *
+    */
+    public void updateExploredCell(int playerRow, int playerCol) {
+        for (Map.Entry<String, Map<String, String>> entry : map.entrySet()) {
+            String rowKey = entry.getKey();
+            Map<String, String> rowMap = entry.getValue();
 
-        for (String[] userData : userDataArray) {
-            if (userData.length == 11) {
-                String username = userData[2];
-
-
-                if (username.equals(targetUsername)) {
-                    userData[1] =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-                }
+        for (Map.Entry<String, String> cellEntry : rowMap.entrySet()) {
+            String colKey = cellEntry.getKey();
+            if (Integer.parseInt(rowKey) == playerRow && Integer.parseInt(colKey) == playerCol) {
+              // If the cell has been explored it will appear as x
+                rowMap.put(colKey, "x");
+            } else {
+              // If the cell has not been explored it will appear as u
+                rowMap.put(colKey, "u");
             }
         }
-
-        try{
-            FileWriter writer = new FileWriter("Users.csv",false);
-            for(String[] user : userDataArray){
-                writer.write(user[0] + "," + user[1] + "," + user[2] + "," + user[3] + "," + user[4] + "," + user[5]
-                        + "," + user[6] + "," + user[7] + "," + user[8] + "," + user[9] + "," + user[10]);
-            }
-        }catch (IOException e){
-            e.printStackTrace();
         }
-
-
     }
+
+    /**
+     * Updates the player's position and displays it in the dungeon.
+     *
+    * @param playerRow The new row coordinate of the player.
+    * @param playerCol The new column coordinate of the player.
+    */
+    public void updatePlayerPosition(int playerRow, int playerCol) {
+        if (isMovePossible(playerRow, playerCol)) {
+           // Update the player's position in the dungeon
+           map.get(String.valueOf(playerRow)).put(String.valueOf(playerCol), "$");
+
+          // Print the updated dungeon map
+         printMap();
+        } else {
+         System.out.println("Invalid move. Player position remains unchanged.");
+     }
+    }
+    
 }
