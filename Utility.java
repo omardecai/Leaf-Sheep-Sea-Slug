@@ -123,13 +123,22 @@ class Utility {
 
      /**
      * Creates a saveFile for the game
-     * @param saveFile  The filename for the save file.
+     * @param username  
      * @param dungeon   The instance of the Dungeon class containing the current dungeon state.
      */
-    public void saveGame(String saveFile, Dungeon dungeon) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(saveFile))) {
+    public void saveGame(String username, Dungeon dungeon, Player playerAttributes) {
+        try {
+            // Save Dungeon State
+            String dungeonSaveFile = username + "savedDungeon.csv";
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(dungeonSaveFile))) {
+                saveDungeonState(writer, dungeon.getMap());
+            }
 
-            saveDungeonState(writer, dungeon.getMap());
+            // Save Player Attributes
+            String playerAttributesSaveFile = username + "Player.csv";
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(playerAttributesSaveFile))) {
+                savePlayerAttributes(writer, playerAttributes);
+            }
 
             System.out.println("Game saved successfully.");
         } catch (IOException e) {
@@ -139,11 +148,29 @@ class Utility {
     }
 
     /**
+     * Helper method to save the attributes of the player.
+     *
+     * @param writer  
+     * @param playerAttributes  
+     * @throws IOException
+     */
+    private void savePlayerAttributes(BufferedWriter writer, Player playerAttributes) throws IOException {
+    
+        writer.write("HealthPoints," + playerAttributes.getHP());
+        writer.newLine();
+        writer.write("Inventory," + playerAttributes.getInventory()));
+        writer.newLine();
+        writer.write("StatusEffects," + playerAttributes.getStatusEffects());
+        writer.newLine();
+        
+    }
+
+    /**
      * Helper method to save the state of the dungeon map.
      * 
-     * @param writer  The BufferedWriter used for writing to the save file.
-     * @param dungeonMap  The dungeon map to be saved.
-     * @throws IOException If an I/O error occurs.
+     * @param writer 
+     * @param dungeonMap  
+     * @throws IOException 
      */
     private void saveDungeonState(BufferedWriter writer, Map<String, Map<String, String>> dungeonMap) throws IOException {
         for (Map.Entry<String, Map<String, String>> entry : dungeonMap.entrySet()) {
